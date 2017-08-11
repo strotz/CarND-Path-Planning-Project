@@ -6,7 +6,6 @@
 #define PATH_PLANNING_ACCELERATION_PLANNER_H
 
 #include <vector>
-#include "Eigen-3.3/Eigen/Dense"
 
 using std::vector;
 using Eigen::MatrixXd;

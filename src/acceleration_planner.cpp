@@ -3,6 +3,7 @@
 //
 
 #include "Eigen-3.3/Eigen/QR"
+#include "Eigen-3.3/Eigen/Dense"
 
 #include "acceleration_planner.hpp"
 
