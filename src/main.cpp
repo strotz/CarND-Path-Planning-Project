@@ -10,6 +10,8 @@
 
 #include "world.h"
 #include "acceleration_planner.hpp"
+#include "vehicle.h"
+#include "trajectory_builder.h"
 
 using namespace std;
 
@@ -37,12 +39,16 @@ int main() {
 	uWS::Hub h;
 
 	// Waypoint map to read from
-	string map_file_ = "../data/highway_map.csv";
+	string map_file_ = "../../data/highway_map.csv";
 
 	world waypoints;
 	waypoints.load_from_file(map_file_);
 
-	h.onMessage([&waypoints](
+	run_state target;
+
+	const double max_speed = 20;
+
+	h.onMessage([&waypoints, &target](
 		uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
 		uWS::OpCode opCode) {
 
@@ -65,16 +71,13 @@ int main() {
 					// j[1] is the data JSON object
 
 					// Main car's localization Data
-					double car_x = j[1]["x"];
-					double car_y = j[1]["y"];
-					double car_s = j[1]["s"];
-					double car_d = j[1]["d"];
-					double car_yaw = j[1]["yaw"];
-					double car_speed = j[1]["speed"];
+					vehicle car;
+					car.load_json(j[1]);
 
 					// Previous path data given to the Planner
 					auto previous_path_x = j[1]["previous_path_x"];
 					auto previous_path_y = j[1]["previous_path_y"];
+
 					// Previous path's end s and d values
 					double end_path_s = j[1]["end_path_s"];
 					double end_path_d = j[1]["end_path_d"];
@@ -82,18 +85,33 @@ int main() {
 					// Sensor Fusion Data, a list of all other cars on the same side of the road.
 					auto sensor_fusion = j[1]["sensor_fusion"];
 
-					json msgJson;
+					// TODO: collision detection
+
+					// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+
+					if (!target.initialized) {
+						target.init(car);
+					}
+
+					vector<position> sparse_positions;
+					sparse_positions.push_back(car.position()); // XYangle
+					sparse_positions.push_back(target.position()); // XYangle
+
+					auto path = trajectory_builder::build_trajectory(car.now(), sparse_positions);
 
 					vector<double> next_x_vals;
 					vector<double> next_y_vals;
 
-					double dist_inc = 0.25;
-					for (int i = 0; i < 50; i++) {
-						next_x_vals.push_back(car_x + (dist_inc * i) * cos(world::deg2rad(car_yaw)));
-						next_y_vals.push_back(car_y + (dist_inc * i) * sin(world::deg2rad(car_yaw)));
+					for (int i = 1; i <= 50; i++) {
+						auto next_position = path.get_position_at(0.02);
+
+						next_x_vals.push_back(next_position.x_);
+						next_y_vals.push_back(next_position.y_);
 					}
 
-					// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+					// END
+
+					json msgJson;
 					msgJson["next_x"] = next_x_vals;
 					msgJson["next_y"] = next_y_vals;
 

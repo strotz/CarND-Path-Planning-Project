@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 using namespace std;
 
@@ -32,6 +33,8 @@ void world::load_from_file(const string &map_file_) {
 		map_waypoints_dx_.push_back(d_x);
 		map_waypoints_dy_.push_back(d_y);
 	}
+
+	cout << "Loaded " << map_waypoints_s_.size() << " points" << endl;
 }
 
 int world::find_current_start(double s) {
@@ -145,9 +148,9 @@ vector<double> world::getFrenet(double x, double y, double theta) {
 
 vector<double> world::getXY(double s, double d) {
 
-	auto maps_s = map_waypoints_s_;
-	auto maps_x = map_waypoints_x_;
-	auto maps_y = map_waypoints_y_;
+	const vector<double>& maps_s = map_waypoints_s_;
+	const vector<double>& maps_x = map_waypoints_x_;
+	const vector<double>& maps_y = map_waypoints_y_;
 
 	int prev_wp = -1;
 

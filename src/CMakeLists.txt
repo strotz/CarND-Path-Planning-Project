@@ -1,7 +1,7 @@
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
-set(sources main.cpp acceleration_planner.cpp world.cpp world.h)
+set(sources main.cpp acceleration_planner.cpp world.cpp world.h vehicle.cpp vehicle.h trajectory_builder.cpp trajectory_builder.h)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
