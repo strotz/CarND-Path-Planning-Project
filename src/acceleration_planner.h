@@ -1,7 +1,3 @@
-//
-// Created by Alexei Strots on 8/4/17.
-//
-
 #ifndef PATH_PLANNING_ACCELERATION_PLANNER_H
 #define PATH_PLANNING_ACCELERATION_PLANNER_H
 

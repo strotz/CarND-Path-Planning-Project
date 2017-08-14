@@ -1,11 +1,7 @@
-//
-// Created by Alexei Strots on 8/4/17.
-//
-
 #include "Eigen-3.3/Eigen/QR"
 #include "Eigen-3.3/Eigen/Dense"
 
-#include "acceleration_planner.hpp"
+#include "acceleration_planner.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -24,7 +20,6 @@ acceleration_planner::acceleration_planner(double T) :
 
 
 vector<double> acceleration_planner::plan(vector<double> start, vector<double> end) {
-	throw std::exception();
 
 	MatrixXd B = MatrixXd(3,1);
 

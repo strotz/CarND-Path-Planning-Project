@@ -1,12 +1,11 @@
-//
-// Created by alstrots on 8/11/17.
-//
-
 #include "world.h"
 
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <math.h>
+
+#include "conversion.h"
 
 using namespace std;
 
@@ -35,25 +34,6 @@ void world::load_from_file(const string &map_file_) {
 	}
 
 	cout << "Loaded " << map_waypoints_s_.size() << " points" << endl;
-}
-
-int world::find_current_start(double s) {
-	double s_norm = fmod(s, max_s_);
-	for (int i = 0; i < map_waypoints_s_.size() - 1; ++i) {
-		if (map_waypoints_s_[i + 1] > s_norm) {
-			return i;
-		}
-	}
-	return map_waypoints_s_.size() - 1;
-}
-
-int world::find_current_end(double s) {
-	int start = find_current_start(s);
-	if (start == map_waypoints_s_.size() - 1) {
-		return 0;
-	} else {
-		return start + 1;
-	}
 }
 
 int world::ClosestWaypoint(double x, double y) {
@@ -146,7 +126,7 @@ vector<double> world::getFrenet(double x, double y, double theta) {
 	return {frenet_s, frenet_d};
 }
 
-vector<double> world::getXY(double s, double d) {
+vector<double> world::getXY(double s, double d) const {
 
 	const vector<double>& maps_s = map_waypoints_s_;
 	const vector<double>& maps_x = map_waypoints_x_;
