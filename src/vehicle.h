@@ -7,6 +7,8 @@
 
 using json = nlohmann::json;
 
+const double car_length = 3.0;
+
 class vehicle_state {
 
 public:

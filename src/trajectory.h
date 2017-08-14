@@ -22,16 +22,17 @@ class trajectory {
 
 public:
 
-	trajectory(const vehicle_state& ref);
+	trajectory(const vehicle_state &ref);
 
 private:
 
-	void load_positions(const vector<position>& path);
-	void finalize(const double& s, const double& d, const double& distance, const double& end_velocity);
+	void load_positions(const vector<position> &path);
+
+	void finalize(const double &s, const double &d, const double &distance, const double &end_velocity);
 
 public:
 
-	position get_position_at(const double& distance);
+	position get_position_at(const double &distance);
 
 	vehicle_state predicted() const {
 		return predicted_state_;
@@ -39,7 +40,8 @@ public:
 
 public:
 
-	static std::unique_ptr<trajectory> maintain_lane(const world& around, const vehicle_state& car, const timing_profile& timing);
+	static std::unique_ptr<trajectory>
+	maintain_lane(const world &around, const vehicle_state &car, const timing_profile &timing);
 };
 
 #endif //PATH_PLANNING_TRAJECTORY_H
