@@ -58,4 +58,27 @@ public:
 	}
 };
 
+class detected_vehicle : public vehicle_state {
+public:
+
+	// [ id, x, y, vx, vy, s, d]
+	int id_;
+
+	void load_json(const json& record) {
+		id_ = record[0];
+
+		p_.x_ = record[1];
+		p_.y_ = record[2];
+
+		double vx = record[3];
+		double vy = record[4];
+
+		s_ = record[5];
+		d_ = record[6];
+
+		orientation_ = atan2(vy, vx);
+		v_ = sqrt(vx * vx + vy * vy);
+	}
+};
+
 #endif //PATH_PLANNING_VEHICLE_H

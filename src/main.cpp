@@ -85,7 +85,7 @@ int main() {
 					auto sensor_fusion = j[1]["sensor_fusion"];
 
 					auto previous_size = previous_path_x.size();
-					cout << "items in buffer: " << previous_size << ", velocity: " << car.v_ << endl;
+					// cout << "items in buffer: " << previous_size << ", velocity: " << car.v_ << endl;
 
 					if (previous_size == 0) {
 
@@ -97,6 +97,17 @@ int main() {
 
 					// TODO: collision detection and state machine
 
+					cout << "my position: " << car.s_ << ", predicted: " << predicted.s_ << endl;
+					for(auto record : sensor_fusion) {
+						detected_vehicle o;
+						o.load_json(record);
+
+						if (o.lane() == target_lane && o.s_ >= car.s_ &&  o.s_ <= predicted.s_) { // look ahead
+							cout << "car in lane: " << o.id_ << ", car position:  " << o.s_<<  endl;
+
+							target_velocity = o.v_; //
+						}
+					}
 
 					vector<double> next_x_vals;
 					vector<double> next_y_vals;
@@ -114,13 +125,13 @@ int main() {
 						std::unique_ptr<timing_profile> timing;
 						std::unique_ptr<trajectory> path;
 
-						cout << "v: " << predicted.velocity() << ", target: " << target_velocity << endl;
+						// cout << "v: " << predicted.velocity() << ", target: " << target_velocity << endl;
 						if (velocity::same(predicted.velocity(), target_velocity)) {
 							timing = timing_profile_builder::maintain_velocity(predicted.velocity());
 							cout << "maintain velocity: " << timing->total_duration() << endl;
 						} else {
 							timing = timing_profile_builder::reach_velocity(predicted.velocity(), target_velocity);
-							cout << "change speed: " << timing->total_duration() << endl;
+							cout << "change speed to: " << target_velocity << " ,duration: "  << timing->total_duration() << endl;
 						}
 
 						if (predicted.lane() == target_lane) {
@@ -142,7 +153,11 @@ int main() {
 							next_y_vals.push_back(next_position.y_);
 						}
 						cout << "sending new profile" << endl;
+
+						double from = predicted.s_;
 						predicted = path->predicted();
+						double to = predicted.s_;
+						cout << "covered: " << from << ", " << to << endl;
 					}
 
 					// END
