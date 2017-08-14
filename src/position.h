@@ -9,7 +9,7 @@ public:
 
 	double x_;
 	double y_;
-	
+
 	position() :
 		x_(0.0),
 		y_(0.0)

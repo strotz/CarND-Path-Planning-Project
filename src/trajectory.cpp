@@ -19,10 +19,25 @@ void trajectory::load_positions(const vector<position>& path) {
 		y.push_back(p.y_);
 	}
 	spline_.set_points(x, y); // build spline
+}
 
-	auto last = path[path.size()-1];
-	auto tan = last.y_ / last.x_;
+void trajectory::finalize(const double& s, const double& d, const double &distance, const double& end_velocity) {
+	auto x = distance;
+	auto y = spline_(x);
+	auto tan = y / x;
 	distance_coeff_ = 1.0 / sqrt(1 + tan * tan);
+
+	auto last = get_position_at(distance);
+	auto car_end = get_position_at(distance - 3.0);
+
+	vehicle_state predicted;
+	predicted.p_ = last;
+	predicted.orientation_ = atan2(last.y_ - car_end.y_, last.x_ - car_end.x_);
+	predicted.s_= s + distance;
+	predicted.d_ = d;
+	predicted.v_ = end_velocity;
+
+	predicted_state_ = predicted;
 }
 
 position trajectory::get_position_at(const double &distance) {
@@ -36,8 +51,8 @@ position trajectory::get_position_at(const double &distance) {
 std::unique_ptr<trajectory> trajectory::maintain_lane(const world& around, const vehicle_state& state, const timing_profile& timing) {
 	// make a sparse trajectory in Frenet space
 	const int parts = 3;
-	const double part = timing.total_distance() / parts;
 	const double d = lane_to_d(state.lane());
+	auto end = timing.total_distance();
 
 	vector<position> sparse;
 
@@ -45,7 +60,7 @@ std::unique_ptr<trajectory> trajectory::maintain_lane(const world& around, const
 
 	for (int i = 1; i <= parts; i++) {
 		// TODO: d could jump, since car.d and target.d differ
-		double s = state.s_ + part * i;
+		double s = state.s_ + end * i;
 		auto p = around.get_xy_position(s, d); // move to XY
 		p = p.project_to(state.p_.x_, state.p_.y_, state.orientation_); // move to CAR
 		sparse.push_back(p);
@@ -54,20 +69,7 @@ std::unique_ptr<trajectory> trajectory::maintain_lane(const world& around, const
 	auto result = std::make_unique<trajectory>(state);
 	result->load_positions(sparse);
 
-	auto end = timing.total_distance();
-	auto last = result->get_position_at(end);
-	auto car_end = result->get_position_at(end - 3.0);
-
-	vehicle_state predicted;
-	predicted.p_ = last;
-	predicted.orientation_ = atan2(last.y_ - car_end.y_, last.x_ - car_end.x_);
-	predicted.s_= state.s_ + end;
-	predicted.d_ = d;
-	predicted.v_ = timing.end_velocity();
-
-	result->predicted_state_ = predicted;
-
-	// cout << "X from: " << state.p_.x_ << ",to: " << result->predicted_state_.p_.x_ <<
+	result->finalize(state.s_, d, end, timing.end_velocity());
 
 	return result;
 }

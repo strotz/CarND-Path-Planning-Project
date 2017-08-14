@@ -27,6 +27,7 @@ public:
 private:
 
 	void load_positions(const vector<position>& path);
+	void finalize(const double& s, const double& d, const double& distance, const double& end_velocity);
 
 public:
 

@@ -43,12 +43,11 @@ int main() {
 	world around;
 	around.load_from_file(map_file_);
 
-	bool first_call = true;
 	vehicle_state predicted; // last state that algorithm predict
 	double target_velocity;
 	int target_lane;
 
-	h.onMessage([&around, &predicted, &first_call, &target_velocity, &target_lane](
+	h.onMessage([&around, &predicted, &target_velocity, &target_lane](
 		uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
 		uWS::OpCode opCode) {
 
@@ -85,18 +84,19 @@ int main() {
 					// Sensor Fusion Data, a list of all other cars on the same side of the road.
 					auto sensor_fusion = j[1]["sensor_fusion"];
 
-					if (first_call) {
+					auto previous_size = previous_path_x.size();
+					cout << "items in buffer: " << previous_size << ", velocity: " << car.v_ << endl;
+
+					if (previous_size == 0) {
+
 						predicted = car; // first time, predicted state is current car state
 						target_velocity = max_velocity;
 						target_lane = car.lane();
-						first_call = false;
 						cout << "init done" << endl;
 					}
 
 					// TODO: collision detection and state machine
 
-					auto previous_size = previous_path_x.size();
-					cout << "items in buffer: " << previous_size << ", velocity: " << car.v_ << endl;
 
 					vector<double> next_x_vals;
 					vector<double> next_y_vals;
@@ -126,6 +126,7 @@ int main() {
 						if (predicted.lane() == target_lane) {
 							// TODO: how to predict orientation for run_state?
 							path = trajectory::maintain_lane(around, predicted, *timing);
+							cout << "maintain lane: " << timing->total_distance() << endl;
 						} else {
 							// TODO: implement change of lane
 							throw not_implemented();
