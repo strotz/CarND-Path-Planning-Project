@@ -6,7 +6,6 @@
 #include "world.h"
 #include "vehicle.h"
 #include "timing_profile.h"
-
 #include "spline/spline.h"
 
 using std::vector;

@@ -75,12 +75,12 @@ public:
 		double acceleration = (target > start) ? max_acceleration : min_acceleration;
 		double duration = (target - start) / acceleration;
 		velocity v(start);
-		return std::make_unique<timing_profile>(v, acceleration, duration);
+		return make_unique<timing_profile>(v, acceleration, duration);
 	}
 
 	static std::unique_ptr<timing_profile> maintain_velocity(const double& start, const double& duration = max_duration) {
 		velocity v(start);
-		return std::make_unique<timing_profile>(v, duration);
+		return make_unique<timing_profile>(v, duration);
 	}
 
 };

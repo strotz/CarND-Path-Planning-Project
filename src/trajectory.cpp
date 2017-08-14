@@ -1,6 +1,5 @@
 #include "trajectory.h"
 #include "position.h"
-#include "spline/spline.h"
 
 using namespace std;
 
@@ -67,7 +66,7 @@ trajectory::maintain_lane(const world &around, const vehicle_state &state, const
 		sparse.push_back(p);
 	}
 
-	auto result = std::make_unique<trajectory>(state);
+	auto result = make_unique<trajectory>(state);
 	result->load_positions(sparse);
 
 	result->finalize(state.s_, d, end, timing.end_velocity());
