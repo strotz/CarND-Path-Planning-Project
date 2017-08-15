@@ -10,6 +10,8 @@
 
 using std::vector;
 
+const double look_ahead_distance = 30;
+
 class trajectory {
 
 	tk::spline spline_;

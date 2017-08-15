@@ -4,6 +4,7 @@
 #include "conversion.h"
 #include "position.h"
 #include "json.hpp"
+#include "velocity.h"
 
 using json = nlohmann::json;
 
@@ -78,6 +79,30 @@ public:
 
 		orientation_ = atan2(vy, vx);
 		v_ = sqrt(vx * vx + vy * vy);
+	}
+};
+
+class target_state {
+
+	velocity v_;
+
+public:
+
+	target_state() : v_(0.0)
+	{
+	}
+
+	double v() const {
+		return v_;
+	}
+
+	void set_v(const double& v) {
+
+
+		if (!v_.same_as(v)) {
+			std::cout << "change target velocity from " << v_ << " to " << v << std::endl;
+		}
+		v_ = v;
 	}
 };
 

@@ -44,10 +44,10 @@ int main() {
 	around.load_from_file(map_file_);
 
 	vehicle_state predicted; // last state that algorithm predict
-	double target_velocity;
+	target_state target;
 	int target_lane;
 
-	h.onMessage([&around, &predicted, &target_velocity, &target_lane](
+	h.onMessage([&around, &predicted, &target, &target_lane](
 		uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
 		uWS::OpCode opCode) {
 
@@ -90,23 +90,30 @@ int main() {
 					if (previous_size == 0) {
 
 						predicted = car; // first time, predicted state is current car state
-						target_velocity = max_velocity;
+						target.set_v(max_velocity);
 						target_lane = car.lane();
 						cout << "init done" << endl;
 					}
 
 					// TODO: collision detection and state machine
 
-					cout << "my position: " << car.s_ << ", predicted: " << predicted.s_ << endl;
+					bool detected = false;
 					for(auto record : sensor_fusion) {
 						detected_vehicle o;
 						o.load_json(record);
 
-						if (o.lane() == target_lane && o.s_ >= car.s_ &&  o.s_ <= predicted.s_) { // look ahead
+						// (car.s_+look_ahead_distance)
+						double end = car.s_ + look_ahead_distance; // predicted.s_;
+						if (o.lane() == target_lane && o.s_ >= car.s_ &&  o.s_ <= end)
+						{
 							cout << "car in lane: " << o.id_ << ", car position:  " << o.s_<<  endl;
-
-							target_velocity = o.v_; //
+							target.set_v(o.v_);
+							detected = true;
 						}
+					}
+					if (!detected)
+					{
+						target.set_v(max_velocity);
 					}
 
 					vector<double> next_x_vals;
@@ -120,18 +127,19 @@ int main() {
 					}
 
 					const double required_steps = max_duration / step_duration;
-					if (previous_size < required_steps) { // calculate new profile
+					while (next_x_vals.size() < required_steps) { // calculate new profile
 
 						std::unique_ptr<timing_profile> timing;
 						std::unique_ptr<trajectory> path;
 
 						// cout << "v: " << predicted.velocity() << ", target: " << target_velocity << endl;
-						if (velocity::same(predicted.velocity(), target_velocity)) {
-							timing = timing_profile_builder::maintain_velocity(predicted.velocity());
+						if (velocity::same(predicted.velocity(), target.v())) {
+							double duration = min(max_duration, (required_steps - next_x_vals.size()) * step_duration);
+							timing = timing_profile_builder::maintain_velocity(predicted.velocity(), duration);
 							cout << "maintain velocity: " << timing->total_duration() << endl;
 						} else {
-							timing = timing_profile_builder::reach_velocity(predicted.velocity(), target_velocity);
-							cout << "change speed to: " << target_velocity << " ,duration: "  << timing->total_duration() << endl;
+							timing = timing_profile_builder::reach_velocity(predicted.velocity(), target.v());
+							cout << "change speed to: " << target.v() << " ,duration: "  << timing->total_duration() << endl;
 						}
 
 						if (predicted.lane() == target_lane) {
