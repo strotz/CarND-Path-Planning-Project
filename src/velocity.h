@@ -22,7 +22,7 @@ private:
 public:
 
 	static bool same(const velocity& one, const velocity& two) {
-		return fabs(one.v_ - two.v_) < 0.0001;
+		return fabs(one.v_ - two.v_) < 0.2;
 	}
 };
 

@@ -8,6 +8,7 @@ inline double mph_to_ms(const double& speed) {
 }
 
 const double lane_width = 4.0;
+const int lanes = 3;
 
 inline int d_to_lane(const double& d) {
 	return d / lane_width;

@@ -43,6 +43,9 @@ public:
 
 	static std::unique_ptr<trajectory>
 	maintain_lane(const world &around, const vehicle_state &car, const timing_profile &timing);
+
+	static std::unique_ptr<trajectory>
+	shift_lane(const world &around, const vehicle_state &state, int target_lane, const timing_profile &timing);
 };
 
 #endif //PATH_PLANNING_TRAJECTORY_H

@@ -13,6 +13,7 @@
 #include "vehicle.h"
 #include "timing_profile.h"
 #include "trajectory.h"
+#include "target_state.h"
 
 using namespace std;
 
@@ -45,9 +46,8 @@ int main() {
 
 	vehicle_state predicted; // last state that algorithm predict
 	target_state target;
-	int target_lane;
 
-	h.onMessage([&around, &predicted, &target, &target_lane](
+	h.onMessage([&around, &predicted, &target](
 		uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
 		uWS::OpCode opCode) {
 
@@ -91,20 +91,26 @@ int main() {
 
 						predicted = car; // first time, predicted state is current car state
 						target.set_v(max_velocity);
-						target_lane = car.lane();
+						target.set_lane(car.lane());
 						cout << "init done" << endl;
 					}
 
-					// TODO: collision detection and state machine
 
-					bool detected = false;
+					vector<detected_vehicle> other_cars;
 					for(auto record : sensor_fusion) {
 						detected_vehicle o;
 						o.load_json(record);
 
+						other_cars.push_back(o);
+					}
+
+					bool detected = false;
+					for(auto o : other_cars) {
+
 						// (car.s_+look_ahead_distance)
 						double end = car.s_ + look_ahead_distance; // predicted.s_;
-						if (o.lane() == target_lane && o.s_ >= car.s_ &&  o.s_ <= end)
+
+						if (o.lane() == predicted.lane() && o.s_ >= car.s_ &&  o.s_ <= end)
 						{
 							cout << "car in lane: " << o.id_ << ", car position:  " << o.s_<<  endl;
 							target.set_v(o.v_);
@@ -115,6 +121,8 @@ int main() {
 					{
 						target.set_v(max_velocity);
 					}
+
+					// target.set_new(state_machine::use_brain(predicted, other_cars);
 
 					vector<double> next_x_vals;
 					vector<double> next_y_vals;
@@ -142,13 +150,12 @@ int main() {
 							cout << "change speed to: " << target.v() << " ,duration: "  << timing->total_duration() << endl;
 						}
 
-						if (predicted.lane() == target_lane) {
-							// TODO: how to predict orientation for run_state?
+						if (predicted.lane() == target.lane()) {
 							path = trajectory::maintain_lane(around, predicted, *timing);
 							cout << "maintain lane: " << timing->total_distance() << endl;
 						} else {
-							// TODO: implement change of lane
-							throw not_implemented();
+							path = trajectory::shift_lane(around, predicted, target.lane(), *timing);
+							cout << "shift lane: " << timing->total_distance() << endl;
 						}
 
 						int steps = timing->total_duration() / step_duration;
@@ -160,15 +167,11 @@ int main() {
 							next_x_vals.push_back(next_position.x_);
 							next_y_vals.push_back(next_position.y_);
 						}
-						cout << "sending new profile" << endl;
-
 						double from = predicted.s_;
 						predicted = path->predicted();
 						double to = predicted.s_;
 						cout << "covered: " << from << ", " << to << endl;
 					}
-
-					// END
 
 					json msgJson;
 					msgJson["next_x"] = next_x_vals;

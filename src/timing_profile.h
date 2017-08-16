@@ -5,7 +5,7 @@
 #include <memory>
 
 const double max_acceleration = 8.0;
-const double min_acceleration = -8.0;
+const double min_acceleration = -5.0;
 
 const double max_duration = 1.0;
 const double step_duration = 0.02;
