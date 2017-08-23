@@ -1,6 +1,8 @@
 #ifndef PATH_PLANNING_VELOCITY_H_H
 #define PATH_PLANNING_VELOCITY_H_H
 
+#include <math.h>
+
 class velocity {
 public:
 
@@ -12,7 +14,7 @@ public:
 	}
 
 	operator double&() { return v_; }
-	// operator const double&() const { return v_; }
+
 	operator double() const { return v_; }
 
 private:

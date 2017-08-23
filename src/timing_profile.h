@@ -1,20 +1,26 @@
 #ifndef PATH_PLANNING_TIMING_PROFILE_H
 #define PATH_PLANNING_TIMING_PROFILE_H
 
+#include "common.h"
 #include "velocity.h"
 #include <memory>
+#include <algorithm>
+#include <iostream>
 
 const double max_acceleration = 8.0;
-const double min_acceleration = -5.0;
+const double min_acceleration = -8.0;
 
 const double max_duration = 1.0;
 const double step_duration = 0.02;
+const double required_steps = max_duration / step_duration;
+
+const double preffered_distance = 1.0;
 
 class timing_profile {
 
 private:
 
-	// assuming 2 profiles: acceleration, constant velocity
+	// assuming constant acceleration
 	// TODO: need one more to cover jerk
 
 	velocity start_v_;
@@ -23,19 +29,17 @@ private:
 
 public:
 
-	timing_profile(const velocity& start_v, const double& duration) :
-		start_v_(start_v),
+	timing_profile() :
+		start_v_(0),
 		acceleration_(0),
-		duration_(duration)
-	{
-	}
+		duration_(0)
+	{}
 
 	timing_profile(const velocity& start_v, const double& acceleration, const double& duration) :
 		start_v_(start_v),
 		acceleration_(acceleration),
 		duration_(duration)
 	{
-		// double reach_speed = start_v_ + acceleration_ * stop_accelation_;
 	}
 
 private:
@@ -70,17 +74,11 @@ public:
 
 class timing_profile_builder {
 public:
+	static timing_profile reach_velocity(const double& start, const double& target, const double& duration);
 
-	static std::unique_ptr<timing_profile> reach_velocity(const double& start, const double& target) {
-		double acceleration = (target > start) ? max_acceleration : min_acceleration;
-		double duration = (target - start) / acceleration;
-		velocity v(start);
-		return make_unique<timing_profile>(v, acceleration, duration);
-	}
-
-	static std::unique_ptr<timing_profile> maintain_velocity(const double& start, const double& duration = max_duration) {
-		velocity v(start);
-		return make_unique<timing_profile>(v, duration);
+	static bool too_close(double car_s, double velocity, double leader_s) {
+		auto future = car_s + velocity * preffered_distance;
+		return future > leader_s;
 	}
 
 };

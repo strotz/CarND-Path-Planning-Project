@@ -10,7 +10,9 @@
 using std::vector;
 using std::string;
 
-const double max_velocity = 20;
+const double speed_limit = 45; // MPH
+
+
 
 class world {
 
@@ -75,5 +77,6 @@ private:
 	vector<double> map_waypoints_dy_;
 };
 
+using world_cref = const world&;
 
 #endif //PATH_PLANNING_WORLD_H

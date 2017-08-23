@@ -59,6 +59,9 @@ public:
 	}
 };
 
+using vehicle_state_cref = const vehicle_state&;
+
+
 class detected_vehicle : public vehicle_state {
 public:
 

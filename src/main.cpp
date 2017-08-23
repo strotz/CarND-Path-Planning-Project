@@ -9,11 +9,12 @@
 #include "json.hpp"
 
 #include "world.h"
+#include "brain.h"
+
 #include "acceleration_planner.h"
 #include "vehicle.h"
 #include "timing_profile.h"
 #include "trajectory.h"
-#include "target_state.h"
 
 using namespace std;
 
@@ -41,13 +42,12 @@ int main() {
 	// Waypoint map to read from
 	string map_file_ = "../../data/highway_map.csv";
 
-	world around;
-	around.load_from_file(map_file_);
+	world road;
+	road.load_from_file(map_file_);
 
-	vehicle_state predicted; // last state that algorithm predict
-	target_state target;
+	brain mind(road);
 
-	h.onMessage([&around, &predicted, &target](
+	h.onMessage([&mind](
 		uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
 		uWS::OpCode opCode) {
 
@@ -85,48 +85,20 @@ int main() {
 					auto sensor_fusion = j[1]["sensor_fusion"];
 
 					auto previous_size = previous_path_x.size();
-					// cout << "items in buffer: " << previous_size << ", velocity: " << car.v_ << endl;
 
-					if (previous_size == 0) {
-
-						predicted = car; // first time, predicted state is current car state
-						target.set_v(max_velocity);
-						target.set_lane(car.lane());
-						cout << "init done" << endl;
+					if (previous_size == 0) { // first time, predicted state is current car state
+						mind.reset_state(car);
 					}
-
 
 					vector<detected_vehicle> other_cars;
 					for(auto record : sensor_fusion) {
 						detected_vehicle o;
 						o.load_json(record);
-
 						other_cars.push_back(o);
 					}
 
-					bool detected = false;
-					for(auto o : other_cars) {
-
-						// (car.s_+look_ahead_distance)
-						double end = car.s_ + look_ahead_distance; // predicted.s_;
-
-						if (o.lane() == predicted.lane() && o.s_ >= car.s_ &&  o.s_ <= end)
-						{
-							cout << "car in lane: " << o.id_ << ", car position:  " << o.s_<<  endl;
-							target.set_v(o.v_);
-							detected = true;
-						}
-					}
-					if (!detected)
-					{
-						target.set_v(max_velocity);
-					}
-
-					// target.set_new(state_machine::use_brain(predicted, other_cars);
-
 					vector<double> next_x_vals;
 					vector<double> next_y_vals;
-
 					for(auto x: previous_path_x) {
 						next_x_vals.push_back(x);
 					}
@@ -134,45 +106,15 @@ int main() {
 						next_y_vals.push_back(y);
 					}
 
-					const double required_steps = max_duration / step_duration;
 					while (next_x_vals.size() < required_steps) { // calculate new profile
 
-						std::unique_ptr<timing_profile> timing;
-						std::unique_ptr<trajectory> path;
-
-						// cout << "v: " << predicted.velocity() << ", target: " << target_velocity << endl;
-						if (velocity::same(predicted.velocity(), target.v())) {
-							double duration = min(max_duration, (required_steps - next_x_vals.size()) * step_duration);
-							timing = timing_profile_builder::maintain_velocity(predicted.velocity(), duration);
-							cout << "maintain velocity: " << timing->total_duration() << endl;
-						} else {
-							timing = timing_profile_builder::reach_velocity(predicted.velocity(), target.v());
-							cout << "change speed to: " << target.v() << " ,duration: "  << timing->total_duration() << endl;
+						auto profile = mind.run_planning(car, other_cars);
+						auto trajectory = profile->calculate_trajectory();
+						for (auto position : trajectory) {
+							next_x_vals.push_back(position.x_);
+							next_y_vals.push_back(position.y_);
 						}
-
-						if (predicted.lane() == target.lane()) {
-							path = trajectory::maintain_lane(around, predicted, *timing);
-							cout << "maintain lane: " << timing->total_distance() << endl;
-						} else {
-							path = trajectory::shift_lane(around, predicted, target.lane(), *timing);
-							cout << "shift lane: " << timing->total_distance() << endl;
-						}
-
-						int steps = timing->total_duration() / step_duration;
-						for (int i = 1; i <= steps; i++) {
-							auto delay = i * step_duration;
-							auto distance = timing->get_distance_at(delay);
-							auto next_position = path->get_position_at(distance);
-
-							next_x_vals.push_back(next_position.x_);
-							next_y_vals.push_back(next_position.y_);
-						}
-						double from = predicted.s_;
-						predicted = path->predicted();
-						double to = predicted.s_;
-						cout << "covered: " << from << ", " << to << endl;
 					}
-
 					json msgJson;
 					msgJson["next_x"] = next_x_vals;
 					msgJson["next_y"] = next_y_vals;

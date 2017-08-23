@@ -25,10 +25,9 @@ public:
 	position project_to(const double& x0, const double& y0, const double& orientation) {
 		double x = x_ - x0;
 		double y = y_ - y0;
-		position result;
-		result.x_ = x * cos(orientation) + y * sin(orientation);
-		result.y_ = - x * sin(orientation) + y * cos(orientation);
-		return result;
+		double pos_x = x * cos(orientation) + y * sin(orientation);
+		double pos_y = - x * sin(orientation) + y * cos(orientation);
+		return position(pos_x, pos_y);
 	}
 
 	position project_from(const double& x0, const double& y0, const double& orientation) {
