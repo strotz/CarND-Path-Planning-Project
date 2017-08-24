@@ -19,7 +19,7 @@ void trajectory::load_positions(const vector<position> &path) {
 	spline_.set_points(x, y); // build spline
 }
 
-void trajectory::finalize(const double &s, const double &d, const double &distance, const double &end_velocity) {
+void trajectory::finalize(const point& s, const double &d, const double &distance, const double &end_velocity) {
 	auto x = distance;
 	auto y = spline_(x);
 	auto tan = y / x;
@@ -58,7 +58,7 @@ trajectory::maintain_lane(const world &road, const vehicle_state &car, const tim
 	sparse.push_back(position(0, 0)); // position in CAR coordinates
 
 	for (int i = 1; i <= parts; i++) {
-		double s = car.s_ + look_ahead_distance * i;
+		point s = car.s_ + look_ahead_distance * i;
 		auto p = road.get_xy_position(s, d); // move to XY
 		p = p.project_to(car.p_.x_, car.p_.y_, car.orientation_); // move to CAR coordinates
 		sparse.push_back(p);
@@ -84,7 +84,7 @@ trajectory::shift_lane(const world &road, const vehicle_state& car, int target_l
 	// TODO: calculate timing based on velocity (how long to change lane)
 
 	for (int i = 1; i <= parts; i++) {
-		double s = car.s_ + look_ahead_distance * i;
+		point s = car.s_ + look_ahead_distance * i;
 		auto p = road.get_xy_position(s, d); // move to XY
 		p = p.project_to(car.p_.x_, car.p_.y_, car.orientation_); // move to CAR coordinates
 		sparse.push_back(p);

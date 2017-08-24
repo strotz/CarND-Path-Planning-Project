@@ -5,6 +5,7 @@
 #include "position.h"
 #include "json.hpp"
 #include "velocity.h"
+#include "point.h"
 
 using json = nlohmann::json;
 
@@ -15,8 +16,8 @@ class vehicle_state {
 public:
 
 	position p_;
+	point s_;
 
-	double s_;
 	double d_;
 
 	double orientation_;
@@ -49,7 +50,7 @@ public:
 
 		p_.y_ = record["y"];
 		p_.x_ = record["x"];
-		s_ = record["s"];
+		s_ = point((double)record["s"]);
 		d_ = record["d"];
 		yaw_ = record["yaw"];
 		speed_ = record["speed"];
@@ -77,7 +78,7 @@ public:
 		double vx = record[3];
 		double vy = record[4];
 
-		s_ = record[5];
+		s_ = point((double)record[5]);
 		d_ = record[6];
 
 		orientation_ = atan2(vy, vx);

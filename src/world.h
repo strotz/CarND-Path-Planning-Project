@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "position.h"
+#include "point.h"
 
 using std::vector;
 using std::string;
@@ -16,8 +17,7 @@ class world {
 
 public:
 
-	world(double max_s = 6945.554) :
-		max_s_(max_s),
+	world() :
 		map_waypoints_x_(),
 		map_waypoints_y_(),
 		map_waypoints_s_(),
@@ -25,11 +25,6 @@ public:
 		map_waypoints_dy_()
 	{
 	}
-
-private:
-
-	// The max s value before wrapping around the track back to 0
-	double max_s_; // 6945.554;
 
 public:
 
@@ -50,8 +45,8 @@ private:
 
 public:
 
-	position get_xy_position(double s, double d) const {
-		auto xy = getXY(s, d);
+	position get_xy_position(const point& s, double d) const {
+		auto xy = getXY(s.value(), d);
 		return position(xy[0], xy[1]);
 	}
 

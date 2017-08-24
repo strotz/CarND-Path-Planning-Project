@@ -8,6 +8,7 @@ set(sources
         cost_estimator.h
         prediction.h
         position.h
+        point.h
         main.cpp
         states.h
         timing_profile.cpp
@@ -20,7 +21,8 @@ set(sources
         trajectory.h
         velocity.h
         brain.cpp
-        brain.h)
+        brain.h
+        )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 

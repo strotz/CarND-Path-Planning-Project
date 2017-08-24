@@ -10,8 +10,8 @@ bool cost_estimator::check_collision()
 	//     [car]--start_delay-->([start]------[end])
 
 
-	double ego_start = candidate_->start_state().s_ - car_length;
-	double ego_end = candidate_->end_state().s_;
+	point ego_start = candidate_->start_state().s_ - car_length;
+	point ego_end = candidate_->end_state().s_;
 
 #ifdef DEV
 	cout << "EGO: " << ego_start << ", " << ego_end << endl;
@@ -23,8 +23,8 @@ bool cost_estimator::check_collision()
 	double duration = candidate_->duration();
 
 	for(auto c : others_) {
-		double start = c.s_ + c.v_ * start_delay_ - car_length;
-		double end = start + car_length + c.v_ * duration;
+		point start = c.s_ + c.v_ * start_delay_ - car_length;
+		point end = start + car_length + c.v_ * duration;
 
 		if (start < ego_end && end > ego_start)
 		{
