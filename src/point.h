@@ -54,4 +54,6 @@ public:
 	}
 };
 
+using point_cref = const point&;
+
 #endif //PATH_PLANNING_DISTANCE_H

@@ -1,4 +1,5 @@
 
+#include "sensor_fusion.h"
 #include "brain.h"
 #include "prediction.h"
 #include "trajectory.h"
@@ -23,7 +24,7 @@ void brain::reset_state(vehicle_state_cref car) {
 }
 
 unique_ptr<prediction>
-brain::generate_prediction(states state, vehicle_state_cref car, const vector<detected_vehicle> &others) {
+brain::generate_prediction(states state, vehicle_state_cref car, sensor_fusion_cref others) {
 	switch (state) {
 		case KeepLine:
 			return generate_keep_in_line(car, others);
@@ -39,7 +40,7 @@ brain::generate_prediction(states state, vehicle_state_cref car, const vector<de
 	}
 }
 
-unique_ptr<prediction> brain::run_planning(vehicle car, vector<detected_vehicle> others, double start_delay) {
+unique_ptr<prediction> brain::run_planning(vehicle car, sensor_fusion_cref others, double start_delay) {
 
 	// TODO: need function
 	auto possible_transitions = vector<states>({KeepLine});
@@ -73,36 +74,14 @@ unique_ptr<prediction> brain::run_planning(vehicle car, vector<detected_vehicle>
 	return best_prediction;
 }
 
-vector<detected_vehicle>::const_iterator find_nearest_car(
-	const vector<detected_vehicle> &others,
-	int lane,
-	const point& from,
-	const point& to) {
-	bool in_front = false;
-	vector<detected_vehicle>::const_iterator leader = others.cend();
-	for (vector<detected_vehicle>::const_iterator c = others.cbegin(); c != others.cend(); ++c) {
-		if (lane == c->lane() && from < c->s_ && c->s_ < to) {
-			if (!in_front) {
-				leader = c;
-				in_front = true;
-			} else {
-				if (c->s_ < leader->s_) {
-					leader = c;
-				}
-			}
-		}
-	}
-	return leader;
-}
-
 unique_ptr<prediction>
-brain::generate_keep_in_line(const vehicle_state &start_state, const vector<detected_vehicle> &others) {
+brain::generate_keep_in_line(const vehicle_state &start_state, sensor_fusion_cref others) {
 
 	auto future = start_state.s_ + start_state.velocity() * preffered_distance;
-	auto leader = find_nearest_car(others, start_state.lane(), start_state.s_, future);
+	auto leader = others.find_nearest_in_range(start_state.lane(), start_state.s_, future);
 
 	timing_profile timing;
-	if (leader != others.cend()) {
+	if (leader != nullptr) {
 		timing = timing_profile_builder::reach_velocity(start_state.velocity(), leader->velocity(), interval_);
 	} else {
 		timing = timing_profile_builder::reach_velocity(start_state.velocity(), target_velocity_, interval_);
@@ -122,13 +101,13 @@ brain::generate_keep_in_line(const vehicle_state &start_state, const vector<dete
 }
 
 unique_ptr<prediction>
-brain::generate_change_line(const vehicle_state &start_state, const vector<detected_vehicle> &others, int target_lane) {
+brain::generate_change_line(const vehicle_state &start_state, sensor_fusion_cref others, int target_lane) {
 
 	auto future = start_state.s_ + start_state.velocity() * preffered_distance;
-	auto leader = find_nearest_car(others, target_lane, start_state.s_, future);
+	auto leader = others.find_nearest_in_range(target_lane, start_state.s_, future);
 
 	timing_profile timing;
-	if (leader != others.cend()) {
+	if (leader != nullptr) {
 		timing = timing_profile_builder::reach_velocity(start_state.velocity(), leader->velocity(), interval_);
 	} else {
 		timing = timing_profile_builder::reach_velocity(start_state.velocity(), target_velocity_, interval_);
@@ -150,11 +129,11 @@ brain::generate_change_line(const vehicle_state &start_state, const vector<detec
 
 // TODO: check wtf is going on with S on end of round (should it be devided by max?)
 
-bool brain::has_emergencies(const vehicle &car, const vector<detected_vehicle> &others) {
+bool brain::has_emergencies(const vehicle &car, sensor_fusion_cref others) {
 	point start = car.s_;
 	point end = last_state_.s_;
-	auto leader = find_nearest_car(others, car.lane(), start, end);
-	if (leader == others.cend()) {
+	auto leader = others.find_nearest_in_range(car.lane(), start, end);
+	if (leader == nullptr) {
 		return false;
 	}
 	auto s = leader->s_ + leader->v_ * max_duration;

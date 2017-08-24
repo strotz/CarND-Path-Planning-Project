@@ -15,6 +15,7 @@
 #include "vehicle.h"
 #include "timing_profile.h"
 #include "trajectory.h"
+#include "sensor_fusion.h"
 
 using namespace std;
 
@@ -82,16 +83,10 @@ int main() {
 					double end_path_d = j[1]["end_path_d"];
 
 					// Sensor Fusion Data, a list of all other cars on the same side of the road.
-					auto sensor_fusion = j[1]["sensor_fusion"];
+					sensor_fusion others;
+					others.load_json(j[1]["sensor_fusion"]);
 
 					auto previous_size = previous_path_x.size();
-
-					vector<detected_vehicle> other_cars;
-					for(auto record : sensor_fusion) {
-						detected_vehicle o;
-						o.load_json(record);
-						other_cars.push_back(o);
-					}
 
 					vector<double> next_x_vals;
 					vector<double> next_y_vals;
@@ -99,7 +94,7 @@ int main() {
 					// collision prevention reset
 					if (previous_size == 0) { // first time, predicted state is current car state
 						mind.reset_state(car);
-					} else if (mind.has_emergencies(car, other_cars)) {
+					} else if (mind.has_emergencies(car, others)) {
 						cout << "RESET";
 						mind.reset_state(car);
 					} else {
@@ -113,7 +108,7 @@ int main() {
 
 					while (next_x_vals.size() < required_steps) { // calculate new profile
 						double covered_time = next_x_vals.size() * step_duration;
-						auto profile = mind.run_planning(car, other_cars, covered_time);
+						auto profile = mind.run_planning(car, others, covered_time);
 						auto trajectory = profile->calculate_trajectory();
 						for (auto position : trajectory) {
 							next_x_vals.push_back(position.x_);

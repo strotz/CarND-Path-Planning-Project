@@ -6,13 +6,14 @@
 #include "states.h"
 #include "vehicle.h"
 #include "prediction.h"
+#include "sensor_fusion.h"
 
 class cost_estimator {
 
 	const states action_;
 	vehicle_state_cref car_;
 	const unique_ptr<prediction>& candidate_;
-	const vector<detected_vehicle>& others_;
+	sensor_fusion_cref others_;
 	const double& start_delay_;
 
 public:
@@ -21,7 +22,7 @@ public:
 		states action,
 		vehicle_state_cref car,
 		const unique_ptr<prediction>& candidate,
-		const vector<detected_vehicle>& others,
+		sensor_fusion_cref others,
 		const double& start_delay)
 		:
 		action_(action),

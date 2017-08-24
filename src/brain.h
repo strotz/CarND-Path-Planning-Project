@@ -7,12 +7,9 @@
 #include "timing_profile.h"
 #include "trajectory.h"
 #include "prediction.h"
+#include "sensor_fusion.h"
 
 using namespace std;
-
-vector<detected_vehicle>::const_iterator find_nearest_car(const vector<detected_vehicle>& others,
-                                                          int lane, double from, double to);
-
 
 class brain {
 
@@ -34,16 +31,16 @@ public:
 
 	void reset_state(vehicle_state_cref car);
 
-	unique_ptr<prediction> run_planning(vehicle car, vector<detected_vehicle> others, double d);
+	unique_ptr<prediction> run_planning(vehicle car, sensor_fusion_cref others, double d);
 
-	bool has_emergencies(const vehicle &car, const vector<detected_vehicle> &others);
+	bool has_emergencies(const vehicle &car, sensor_fusion_cref others);
 
 private:
 
-	unique_ptr<prediction> generate_prediction(states state, vehicle_state_cref car, const vector<detected_vehicle> &others);
+	unique_ptr<prediction> generate_prediction(states state, vehicle_state_cref car, sensor_fusion_cref others);
 
-	unique_ptr<prediction> generate_keep_in_line(const vehicle_state &start_state, const vector<detected_vehicle>& others);
-	unique_ptr<prediction> generate_change_line(const vehicle_state &start_state, const vector<detected_vehicle>& others, int target_lane);
+	unique_ptr<prediction> generate_keep_in_line(const vehicle_state &start_state, sensor_fusion_cref others);
+	unique_ptr<prediction> generate_change_line(const vehicle_state &start_state, sensor_fusion_cref others, int target_lane);
 };
 
 #endif //PATH_PLANNING_BRAIN_H

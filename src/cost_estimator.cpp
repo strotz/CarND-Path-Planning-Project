@@ -22,7 +22,7 @@ bool cost_estimator::check_collision()
 
 	double duration = candidate_->duration();
 
-	for(auto c : others_) {
+	for(const auto& c : others_.cars()) {
 		point start = c.s_ + c.v_ * start_delay_ - car_length;
 		point end = start + car_length + c.v_ * duration;
 
