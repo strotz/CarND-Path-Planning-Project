@@ -71,7 +71,7 @@ trajectory::maintain_lane(const world &road, const vehicle_state &car, const tim
 }
 
 std::unique_ptr<trajectory>
-trajectory::shift_lane(const world &around, const vehicle_state &state, int target_lane, const timing_profile &timing) {
+trajectory::shift_lane(const world &road, const vehicle_state& car, int target_lane, const timing_profile& timing) {
 	// make a sparse trajectory in Frenet space
 	const int parts = 3;
 	const double d = lane_to_d(target_lane);
@@ -84,14 +84,14 @@ trajectory::shift_lane(const world &around, const vehicle_state &state, int targ
 	// TODO: calculate timing based on velocity (how long to change lane)
 
 	for (int i = 1; i <= parts; i++) {
-		double s = state.s_ + look_ahead_distance * i;
-		auto p = around.get_xy_position(s, d); // move to XY
-		p = p.project_to(state.p_.x_, state.p_.y_, state.orientation_); // move to CAR coordinates
+		double s = car.s_ + look_ahead_distance * i;
+		auto p = road.get_xy_position(s, d); // move to XY
+		p = p.project_to(car.p_.x_, car.p_.y_, car.orientation_); // move to CAR coordinates
 		sparse.push_back(p);
 	}
 
-	auto result = make_unique<trajectory>(state);
+	auto result = make_unique<trajectory>(car);
 	result->load_positions(sparse);
-	result->finalize(state.s_, d, timing.total_distance(), timing.end_velocity());
+	result->finalize(car.s_, d, timing.total_distance(), timing.end_velocity());
 	return result;
 }

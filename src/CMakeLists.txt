@@ -4,6 +4,9 @@ set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 set(sources
         common.h
         conversion.h
+        cost_estimator.cpp
+        cost_estimator.h
+        prediction.h
         position.h
         main.cpp
         states.h

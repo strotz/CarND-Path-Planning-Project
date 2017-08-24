@@ -4,7 +4,9 @@
 
 
 enum states {
-	KeepLine
+	KeepLine,
+	LineChangeLeft,
+	LineChangeRight
 };
 
 #endif //PATH_PLANNING_STATES_H

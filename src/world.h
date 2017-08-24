@@ -10,9 +10,7 @@
 using std::vector;
 using std::string;
 
-const double speed_limit = 45; // MPH
-
-
+const double speed_limit = 49; // MPH
 
 class world {
 

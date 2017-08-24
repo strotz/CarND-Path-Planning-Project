@@ -14,7 +14,7 @@ const double max_duration = 1.0;
 const double step_duration = 0.02;
 const double required_steps = max_duration / step_duration;
 
-const double preffered_distance = 1.0;
+const double preffered_distance = 1.7;
 
 class timing_profile {
 

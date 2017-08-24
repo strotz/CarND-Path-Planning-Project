@@ -6,27 +6,13 @@
 #include "world.h"
 #include "timing_profile.h"
 #include "trajectory.h"
+#include "prediction.h"
 
 using namespace std;
 
-class prediction {
-	timing_profile timing_;
-	shared_ptr<trajectory> path_;
+vector<detected_vehicle>::const_iterator find_nearest_car(const vector<detected_vehicle>& others,
+                                                          int lane, double from, double to);
 
-public:
-
-	vector<position> calculate_trajectory();
-
-	prediction(timing_profile& timing, shared_ptr<trajectory>& path) :
-		timing_(timing),
-		path_(std::move(path))
-	{
-	}
-
-	vehicle_state end_state() {
-		return path_->predicted();
-	}
-};
 
 class brain {
 
@@ -48,13 +34,16 @@ public:
 
 	void reset_state(vehicle_state_cref car);
 
-	unique_ptr<prediction> run_planning(vehicle_state_cref car, const vector<detected_vehicle> &others);
+	unique_ptr<prediction> run_planning(vehicle car, vector<detected_vehicle> others, double d);
+
+	bool has_emergencies(const vehicle &car, const vector<detected_vehicle> &others);
 
 private:
 
 	unique_ptr<prediction> generate_prediction(states state, vehicle_state_cref car, const vector<detected_vehicle> &others);
 
-	unique_ptr<prediction> generate_keep_in_line(const vehicle_state &state, const vector<detected_vehicle> &vector1);
+	unique_ptr<prediction> generate_keep_in_line(const vehicle_state &start_state, const vector<detected_vehicle>& others);
+	unique_ptr<prediction> generate_change_line(const vehicle_state &start_state, const vector<detected_vehicle>& others, int target_lane);
 };
 
 #endif //PATH_PLANNING_BRAIN_H

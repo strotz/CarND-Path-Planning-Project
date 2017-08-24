@@ -35,7 +35,7 @@ public:
 
 	position get_position_at(const double &distance);
 
-	vehicle_state predicted() const {
+	const vehicle_state& predicted() const {
 		return predicted_state_;
 	}
 
@@ -45,7 +45,7 @@ public:
 	maintain_lane(const world &road, const vehicle_state &car, const timing_profile &timing);
 
 	static std::unique_ptr<trajectory>
-	shift_lane(const world &around, const vehicle_state &state, int target_lane, const timing_profile &timing);
+	shift_lane(const world &road, const vehicle_state &car, int target_lane, const timing_profile &timing);
 };
 
 #endif //PATH_PLANNING_TRAJECTORY_H
