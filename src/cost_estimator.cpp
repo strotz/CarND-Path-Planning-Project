@@ -6,9 +6,7 @@
 bool cost_estimator::check_collision()
 {
 	//  [ego]------start_delay---->([ego_start]------>[ego_end])
-
 	//     [car]--start_delay-->([start]------[end])
-
 
 	point ego_start = candidate_->start_state().s_ - car_length;
 	point ego_end = candidate_->end_state().s_;
@@ -20,15 +18,22 @@ bool cost_estimator::check_collision()
 	int ego_start_lane = candidate_->start_state().lane();
 	int ego_end_lane = candidate_->end_state().lane();
 
+	const double car_width = 3.0;
+	const double car_side = car_width / 2.0;
+	double ego_left = min(candidate_->start_state().d_, candidate_->end_state().d_)  - car_side;
+	double ego_right = max(candidate_->start_state().d_, candidate_->end_state().d_) + car_side;
+
 	double duration = candidate_->duration();
 
 	for(const auto& c : others_.cars()) {
 		point start = c.s_ + c.v_ * start_delay_ - car_length;
 		point end = start + car_length + c.v_ * duration;
-
-		if (start < ego_end && end > ego_start)
+		if (start < ego_end && ego_start < end)
 		{
-			if (c.lane() == ego_start_lane || c.lane() == ego_end_lane) {
+			double right = c.d_ + car_side;
+			double left = c.d_ - car_side;
+
+			if (right >= ego_left && left <= ego_right) {
 				return true;
 			}
 		}

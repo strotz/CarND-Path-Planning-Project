@@ -71,6 +71,15 @@ unique_ptr<prediction> brain::run_planning(vehicle car, sensor_fusion_cref other
 #endif
 
 	last_state_ = best_prediction->end_state();
+
+#ifdef DEV
+	if (best_acton == LineChangeLeft || best_acton == LineChangeRight) {
+		cout << endl << "change lane from " << car.lane() << " to " << last_state_.lane() << endl;
+		cout << "ego: " << car.s_.value() << endl;
+		others.dump();
+	}
+#endif
+
 	return best_prediction;
 }
 

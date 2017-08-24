@@ -24,6 +24,8 @@ public:
 	const std::vector<detected_vehicle>& cars() const  {
 		return other_cars_;
 	}
+
+	void dump() const;
 };
 
 using sensor_fusion_cref = const sensor_fusion&;

@@ -1,6 +1,6 @@
 set(test_sources
         main.cpp
-        map_waypoints_tests)
+        map_waypoints_tests collision.cpp)
 
 add_executable(path_planning_tests ${test_sources})
 
