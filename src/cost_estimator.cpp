@@ -78,12 +78,17 @@ int cost_estimator::calculate_cost() {
 
 	if (check_collision()) {
 		out() << "collision found" << endl;
-		result += 100000;
+		result += 10000;
+
+		// penalize change lane during collision
+		if (action_ == LineChangeRight || action_ == LineChangeLeft) {
+			result += 10000;
+		}
 	}
 
 	result += distance_to_slow_leader() * 12; // penalize
 
-	// penalize change lane
+	// penalize change lane without collision
 	if (action_ == LineChangeRight || action_ == LineChangeLeft) {
 		result += 20;
 	}

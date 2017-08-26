@@ -98,7 +98,8 @@ brain::generate_keep_in_line(const vehicle_state &start_state, sensor_fusion_cre
 
 	timing_profile timing;
 	if (leader != nullptr) {
-		timing = timing_profile_builder::reach_velocity(start_state.velocity(), leader->velocity(), interval_);
+		double lead_v = min(leader->velocity(), target_velocity_);
+		timing = timing_profile_builder::reach_velocity(start_state.velocity(), lead_v, interval_);
 	} else {
 		timing = timing_profile_builder::reach_velocity(start_state.velocity(), target_velocity_, interval_);
 	}
@@ -124,7 +125,8 @@ brain::generate_change_line(const vehicle_state &start_state, sensor_fusion_cref
 
 	timing_profile timing;
 	if (leader != nullptr) {
-		timing = timing_profile_builder::reach_velocity(start_state.velocity(), leader->velocity(), interval_);
+		double lead_v = min(leader->velocity(), target_velocity_);
+		timing = timing_profile_builder::reach_velocity(start_state.velocity(), lead_v, interval_);
 	} else {
 		timing = timing_profile_builder::reach_velocity(start_state.velocity(), target_velocity_, interval_);
 	}

@@ -10,7 +10,7 @@
 const double max_acceleration = 8.0;
 const double min_acceleration = -8.0;
 
-const double max_duration = 1.0;
+const double max_duration = 0.5;
 const double step_duration = 0.02;
 const double required_steps = max_duration / step_duration;
 
@@ -75,12 +75,6 @@ public:
 class timing_profile_builder {
 public:
 	static timing_profile reach_velocity(const double& start, const double& target, const double& duration);
-
-	static bool too_close(double car_s, double velocity, double leader_s) {
-		auto future = car_s + velocity * preffered_distance;
-		return future > leader_s;
-	}
-
 };
 
 #endif //PATH_PLANNING_TIMING_PROFILE_H
