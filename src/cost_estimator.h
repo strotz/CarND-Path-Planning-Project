@@ -8,6 +8,8 @@
 #include "prediction.h"
 #include "sensor_fusion.h"
 
+
+
 class cost_estimator {
 
 	const states action_;
@@ -38,6 +40,8 @@ public:
 private:
 
 	bool check_collision();
+
+	double distance_to_slow_leader();
 };
 
 

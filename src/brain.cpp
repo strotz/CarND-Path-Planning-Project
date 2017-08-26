@@ -72,13 +72,20 @@ unique_ptr<prediction> brain::run_planning(vehicle car, sensor_fusion_cref other
 
 	last_state_ = best_prediction->end_state();
 
-#ifdef DEV
+//#ifdef DEV
 	if (best_acton == LineChangeLeft || best_acton == LineChangeRight) {
+		enable_verbose();
 		cout << endl << "change lane from " << car.lane() << " to " << last_state_.lane() << endl;
-		cout << "ego: " << car.s_.value() << endl;
+		cout << "ego: " << car.s_.value() << " v=" << car.velocity() << endl;
 		others.dump();
+		cout << "start delay=" << start_delay << ", last_state.s=" << last_state_.s_.value() << endl;
+
+		cout << "best action: " << best_acton << " with cost " << best_cost << endl;
+		auto z = cost_estimator(best_acton, car, best_prediction, others, start_delay);
+		z.calculate_cost();
+		disable_verbose();
 	}
-#endif
+//#endif
 
 	return best_prediction;
 }
@@ -133,19 +140,5 @@ brain::generate_change_line(const vehicle_state &start_state, sensor_fusion_cref
 #endif
 
 	return make_unique<prediction>(start_state, timing, path);
-}
-
-
-// TODO: check wtf is going on with S on end of round (should it be devided by max?)
-
-bool brain::has_emergencies(const vehicle &car, sensor_fusion_cref others) {
-	point start = car.s_;
-	point end = last_state_.s_;
-	auto leader = others.find_nearest_in_range(car.lane(), start, end);
-	if (leader == nullptr) {
-		return false;
-	}
-	auto s = leader->s_ + leader->v_ * max_duration;
-	return s < end; // TODO: it is not correct
 }
 

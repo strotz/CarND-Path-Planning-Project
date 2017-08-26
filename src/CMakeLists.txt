@@ -22,7 +22,7 @@ set(sources
         velocity.h
         brain.cpp
         brain.h
-        sensor_fusion.cpp sensor_fusion.h)
+        sensor_fusion.cpp sensor_fusion.h common.cpp)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 

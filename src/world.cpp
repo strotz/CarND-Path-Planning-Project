@@ -36,7 +36,7 @@ void world::load_from_file(const string &map_file_) {
 	cout << "Loaded " << map_waypoints_s_.size() << " points" << endl;
 }
 
-int world::ClosestWaypoint(double x, double y) {
+int world::ClosestWaypoint(double x, double y) const {
 
 	auto maps_x = map_waypoints_x_;
 	auto maps_y = map_waypoints_y_;
@@ -57,7 +57,7 @@ int world::ClosestWaypoint(double x, double y) {
 	return closestWaypoint;
 }
 
-int world::NextWaypoint(double x, double y, double theta) {
+int world::NextWaypoint(double x, double y, double theta) const {
 
 	int closestWaypoint = ClosestWaypoint(x, y);
 
@@ -79,7 +79,7 @@ int world::NextWaypoint(double x, double y, double theta) {
 
 }
 
-vector<double> world::getFrenet(double x, double y, double theta) {
+vector<double> world::getFrenet(double x, double y, double theta) const {
 
 	int next_wp = NextWaypoint(x, y, theta);
 
@@ -156,6 +156,6 @@ vector<double> world::getXY(double s, double d) const {
 
 }
 
-double world::distance(double x1, double y1, double x2, double y2) {
+double world::distance(double x1, double y1, double x2, double y2) const {
 	return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }

@@ -14,6 +14,8 @@ const double look_ahead_distance = 30;
 
 class trajectory {
 
+	world_cref road_;
+
 	tk::spline spline_;
 
 	vehicle_state ref_state_;
@@ -23,7 +25,7 @@ class trajectory {
 
 public:
 
-	trajectory(const vehicle_state &ref);
+	trajectory(world_cref road, const vehicle_state& ref);
 
 private:
 
@@ -33,7 +35,8 @@ private:
 
 public:
 
-	position get_position_at(const double &distance);
+	position get_position_at(const double& distance);
+	frenet get_frenet_at(const double& distance);
 
 	const vehicle_state& predicted() const {
 		return predicted_state_;
@@ -42,10 +45,10 @@ public:
 public:
 
 	static std::unique_ptr<trajectory>
-	maintain_lane(const world &road, const vehicle_state &car, const timing_profile &timing);
+	maintain_lane(world_cref road, const vehicle_state &car, const timing_profile &timing);
 
 	static std::unique_ptr<trajectory>
-	shift_lane(const world &road, const vehicle_state &car, int target_lane, const timing_profile &timing);
+	shift_lane(world_cref road, const vehicle_state &car, int target_lane, const timing_profile &timing);
 };
 
 #endif //PATH_PLANNING_TRAJECTORY_H

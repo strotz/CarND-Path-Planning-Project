@@ -94,9 +94,6 @@ int main() {
 					// collision prevention reset
 					if (previous_size == 0) { // first time, predicted state is current car state
 						mind.reset_state(car);
-					} else if (mind.has_emergencies(car, others)) {
-						cout << "RESET";
-						mind.reset_state(car);
 					} else {
 						for (auto x: previous_path_x) {
 							next_x_vals.push_back(x);

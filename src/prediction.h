@@ -38,6 +38,11 @@ public:
 	const vehicle_state& end_state() const {
 		return path_->predicted();
 	}
+
+	const frenet predict_frenet_at(const double& delay) {
+		auto distance = timing_.get_distance_at(delay);
+		return path_->get_frenet_at(distance);
+	}
 };
 
 

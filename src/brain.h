@@ -33,8 +33,6 @@ public:
 
 	unique_ptr<prediction> run_planning(vehicle car, sensor_fusion_cref others, double d);
 
-	bool has_emergencies(const vehicle &car, sensor_fusion_cref others);
-
 private:
 
 	unique_ptr<prediction> generate_prediction(states state, vehicle_state_cref car, sensor_fusion_cref others);

@@ -25,14 +25,14 @@ public:
 		return s_;
 	}
 
-	point operator+(const point& other) const
+	double operator+(const point& other) const
 	{
-		return point(s_ + other.s_);
+		return s_ + other.s_;
 	}
 
-	point operator-(const point& other) const
+	double operator-(const point& other) const
 	{
-		return point(s_ - other.s_);
+		return s_ - other.s_;
 	}
 
 	point operator+(const double& other) const

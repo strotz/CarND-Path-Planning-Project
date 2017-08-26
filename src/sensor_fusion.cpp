@@ -19,6 +19,6 @@ const detected_vehicle *sensor_fusion::find_nearest_in_range(int lane, point_cre
 
 void sensor_fusion::dump() const {
 	for(const auto& c : other_cars_) {
-		std::cout << "car " << c.id_ << " - " << c.s_.value() << " - " << c.lane() << std::endl;
+		std::cout << "car " << c.id_ << " - " << c.s_.value() << " - " << c.lane() << " v=" << c.velocity() << std::endl;
 	}
 }

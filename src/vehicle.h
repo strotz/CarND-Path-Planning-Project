@@ -10,6 +10,22 @@
 using json = nlohmann::json;
 
 const double car_length = 5.0;
+const double car_width = 3.0;
+
+class frenet {
+
+public:
+
+	frenet() {}
+
+	frenet(const double& s, const double& d) :
+		s_(s),
+		d_(d)
+	{}
+
+	point s_;
+	double d_;
+};
 
 class vehicle_state {
 

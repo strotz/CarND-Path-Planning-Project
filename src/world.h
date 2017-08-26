@@ -7,6 +7,7 @@
 #include "common.h"
 #include "position.h"
 #include "point.h"
+#include "vehicle.h"
 
 using std::vector;
 using std::string;
@@ -34,14 +35,14 @@ public:
 private:
 
 	// Transform from Cartesian x,y coordinates to Frenet s,d coordinates
-	vector<double> getFrenet(double x, double y, double theta);
+	vector<double> getFrenet(double x, double y, double theta) const;
 
 	// Transform from Frenet s,d coordinates to Cartesian x,y
 	vector<double> getXY(double s, double d) const ;
 
-	int ClosestWaypoint(double x, double y);
+	int ClosestWaypoint(double x, double y) const ;
 
-	int NextWaypoint(double x, double y, double theta);
+	int NextWaypoint(double x, double y, double theta) const ;
 
 public:
 
@@ -50,9 +51,14 @@ public:
 		return position(xy[0], xy[1]);
 	}
 
+	frenet get_frenet_position(position xy, double theta) const {
+		auto sd = getFrenet(xy.x_, xy.y_, theta);
+		return frenet(sd[0], sd[1]);
+	}
+
 private:
 
-	double distance(double x1, double y1, double x2, double y2);
+	double distance(double x1, double y1, double x2, double y2) const;
 
 private:
 

@@ -3,9 +3,11 @@
 
 using namespace std;
 
-trajectory::trajectory(const vehicle_state &ref) :
-		ref_state_(ref),
-		spline_(tk::spline()) {
+trajectory::trajectory(world_cref road, const vehicle_state &ref) :
+	road_(road),
+	ref_state_(ref),
+	spline_(tk::spline())
+{
 }
 
 void trajectory::load_positions(const vector<position> &path) {
@@ -19,7 +21,7 @@ void trajectory::load_positions(const vector<position> &path) {
 	spline_.set_points(x, y); // build spline
 }
 
-void trajectory::finalize(const point& s, const double &d, const double &distance, const double &end_velocity) {
+void trajectory::finalize(const point &s, const double &d, const double &distance, const double &end_velocity) {
 	auto x = distance;
 	auto y = spline_(x);
 	auto tan = y / x;
@@ -47,7 +49,7 @@ position trajectory::get_position_at(const double &distance) {
 }
 
 std::unique_ptr<trajectory>
-trajectory::maintain_lane(const world &road, const vehicle_state &car, const timing_profile &timing) {
+trajectory::maintain_lane(world_cref road, const vehicle_state &car, const timing_profile &timing) {
 	// make a sparse trajectory in Frenet space
 	const int parts = 3;
 	const double d = lane_to_d(car.lane());
@@ -64,14 +66,14 @@ trajectory::maintain_lane(const world &road, const vehicle_state &car, const tim
 		sparse.push_back(p);
 	}
 
-	auto result = make_unique<trajectory>(car);
+	auto result = make_unique<trajectory>(road, car);
 	result->load_positions(sparse);
 	result->finalize(car.s_, d, timing.total_distance(), timing.end_velocity());
 	return result;
 }
 
 std::unique_ptr<trajectory>
-trajectory::shift_lane(const world &road, const vehicle_state& car, int target_lane, const timing_profile& timing) {
+trajectory::shift_lane(world_cref road, const vehicle_state &car, int target_lane, const timing_profile &timing) {
 	// make a sparse trajectory in Frenet space
 	const int parts = 3;
 	const double d = lane_to_d(target_lane);
@@ -81,8 +83,6 @@ trajectory::shift_lane(const world &road, const vehicle_state& car, int target_l
 	sparse.push_back(position(-car_length, 0)); // position of the car back in CAR coordinates
 	sparse.push_back(position()); // position in CAR coordinates
 
-	// TODO: calculate timing based on velocity (how long to change lane)
-
 	for (int i = 1; i <= parts; i++) {
 		point s = car.s_ + look_ahead_distance * i;
 		auto p = road.get_xy_position(s, d); // move to XY
@@ -90,8 +90,15 @@ trajectory::shift_lane(const world &road, const vehicle_state& car, int target_l
 		sparse.push_back(p);
 	}
 
-	auto result = make_unique<trajectory>(car);
+	auto result = make_unique<trajectory>(road, car);
 	result->load_positions(sparse);
 	result->finalize(car.s_, d, timing.total_distance(), timing.end_velocity());
 	return result;
+}
+
+frenet trajectory::get_frenet_at(const double &distance) {
+	auto xy = get_position_at(distance);
+	auto car_end_xy = get_position_at(distance - car_length);
+	double theta = atan2(xy.y_ - car_end_xy.y_, xy.x_ - car_end_xy.x_);
+	return road_.get_frenet_position(xy, theta);
 }
