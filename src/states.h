@@ -5,6 +5,7 @@
 
 enum states {
 	KeepLine,
+	SlowDown,
 	LineChangeLeft,
 	LineChangeRight
 };

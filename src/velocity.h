@@ -9,10 +9,6 @@ public:
 	velocity(const double& v) : v_(v) {
 	}
 
-	bool same_as(const velocity& other) const {
-		return same(*this, other);
-	}
-
 	operator double&() { return v_; }
 
 	operator double() const { return v_; }
@@ -20,12 +16,6 @@ public:
 private:
 
 	double v_;
-
-public:
-
-	static bool same(const velocity& one, const velocity& two) {
-		return fabs(one.v_ - two.v_) < 0.2;
-	}
 };
 
 

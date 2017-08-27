@@ -12,7 +12,7 @@ class sensor_fusion {
 public:
 
 	void load_json(const json& records) {
-		for(auto record : records) {
+		for(const auto& record : records) {
 			detected_vehicle o;
 			o.load_json(record);
 			other_cars_.push_back(o);
@@ -23,6 +23,12 @@ public:
 
 	const std::vector<detected_vehicle>& cars() const  {
 		return other_cars_;
+	}
+
+	void shift_s() {
+		for(auto& c: other_cars_) {
+			c.s_.shift();
+		}
 	}
 
 	void dump() const;

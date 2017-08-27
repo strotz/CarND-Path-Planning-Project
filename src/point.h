@@ -52,6 +52,10 @@ public:
 	bool operator>(const point& other) const {
 		return s_ > other.s_;
 	}
+
+	void shift() {
+		s_ = s_ - max_s;
+	}
 };
 
 using point_cref = const point&;

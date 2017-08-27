@@ -42,6 +42,8 @@ private:
 	bool check_collision();
 
 	double distance_to_slow_leader();
+
+	double check_prediced();
 };
 
 

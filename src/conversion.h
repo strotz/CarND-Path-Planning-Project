@@ -3,6 +3,11 @@
 #ifndef PATH_PLANNING_CONVERSION_H
 #define PATH_PLANNING_CONVERSION_H
 
+const double speed_limit = 47; // MPH
+
+const double max_acceleration = 7.0;
+const double min_acceleration = -7.0;
+
 inline double mph_to_ms(const double& speed) {
 	return speed * 0.44704;
 }

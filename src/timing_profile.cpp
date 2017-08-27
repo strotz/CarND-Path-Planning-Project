@@ -1,4 +1,5 @@
 #include "timing_profile.h"
+#include "conversion.h"
 
 timing_profile timing_profile_builder::reach_velocity(const double &start, const double &target, const double &duration) {
 	double required = (target - start) / duration;

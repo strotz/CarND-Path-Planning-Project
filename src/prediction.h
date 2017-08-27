@@ -31,12 +31,21 @@ public:
 		return timing_.total_duration();
 	}
 
+	double total_distance() const {
+		return timing_.total_distance();
+	}
+
 	const vehicle_state& start_state() const {
 		return start_;
 	}
 
 	const vehicle_state& end_state() const {
 		return path_->predicted();
+	}
+
+	const point predict_s_at(const double& delay) const {
+		auto distance = timing_.get_distance_at(delay);
+		return start_.s_ + distance;
 	}
 
 	const frenet predict_frenet_at(const double& delay) {

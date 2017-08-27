@@ -86,6 +86,16 @@ int main() {
 					sensor_fusion others;
 					others.load_json(j[1]["sensor_fusion"]);
 
+					mind.correct_last_state(end_path_s, end_path_d);
+
+					if (car.s_ > max_s) {
+						car.s_.shift();
+						others.shift_s();
+						mind.shift_s();
+						cout << "s shifted to: " << car.s_.value() << endl;
+					}
+
+
 					auto previous_size = previous_path_x.size();
 
 					vector<double> next_x_vals;
