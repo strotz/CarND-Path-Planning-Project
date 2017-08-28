@@ -20,11 +20,27 @@ Yet, such operations could be relatively long and it reduces speed of system rea
 
 Due to the nature of the map waypoint model, constant D coordinate will not grantee movement without position jerks. As recommended in class, spline library is used for trajectory generation in (X,Y) space. Next sequence of operations implemented to generate model:
 1. Originated sparse trajectory in frenet
-2. Converted to absolute XY
+2. Converted to map XY
 3. Converted to car XY
 4. Spline computed
 
-To generate path from model. First, linear distance calculated by timing profile based on delay (each 20 milliseconds). Then linear distance 
+To generate path from model. First, distance in frenet coordinates calculated by timing profile based on delay from start of prediction (each 20 milliseconds). Then distance transferred to car X coordinate. Spline used to obtain Y component in car system. And finally transferred to map XY coordinates (see prediction::calculate_trajectory and trajectory::get_position_at).
+
+#### it is all about future
+
+Two things it is important to mention regarding this project. Result of the path planning usually is quite coarse. Result passed to control module (for example PID or MPC) and those modules are responsible for fine tuning of the trajectory. For this project, path planner takes partial responsibility of control module and suppose to generate fine trajectory - series of XY coordinates. To avoid sharp changes of the direction or large jerk, in addition to the methods described above, continuation ot the path is used. I.e. simulator provides back sequence of positions that calculated during previous planning step and not used by simulator yet. So to achive continuation path planner suppose to start next step planning not from current position of the vehicle, but from result of previous step. 
+
+Since each step start calculation not from actual car position, but from result of previous prediction, discrepancies between predicted position and reality occurred very quickly. Luckely, simulator provided end_path_s and end_path_d feedback, that enabled correction of prediction error.
+
+#### states of FSM
+
+1. KeepLane - maintain car's D position and adjust velocity of the vehicle based on the speed either of car ahead or speed limit
+2. SlowDown - special case of KeepLine designed to reduce speed of the ego when "cut-off" car is detected
+3. ChangeLaneRight and ChangeLaneLeft - switch lane to achive higher velocity and distance to the car aher (leader)       
+
+#### states of FSM
+
+1.    
   
 
         
