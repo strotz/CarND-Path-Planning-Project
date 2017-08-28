@@ -125,7 +125,7 @@ int cost_estimator::calculate_cost() {
 	}
 
 	// faster is better
-	result += (mph_to_ms(speed_limit) - candidate_->end_state().v_) * 10;
+	result += fabs(mph_to_ms(speed_limit) - candidate_->end_state().v_) * 10;
 
 	return result;
 

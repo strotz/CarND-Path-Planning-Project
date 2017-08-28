@@ -2,13 +2,11 @@
 
 The goal of the project is to implement path planning module that safely navigates the vehicle in highway traffic. It includes dealing with vehicle speed and acceleration, changing lanes, avoiding collision with other vehicles.
 
-### map of the world
+#### map of the world
 
 The map of the highway is defines via collection of waypoints that allow us approximately convert from frenet (s, d) to cartesian (x, y) and back. Class world is defined to implement such operations. 
 
 Due to the cyclic nature of the map, S coordinate has a maximum value. In order to ensure continuation of the planning, as soon as car S coordinate reaches certain value, its and other vehicles coordinates shifted.
-
-### project genesis
 
 #### timing
 
@@ -38,9 +36,17 @@ Since each step start calculation not from actual car position, but from result 
 2. SlowDown - special case of KeepLine designed to reduce speed of the ego when "cut-off" car is detected
 3. ChangeLaneRight and ChangeLaneLeft - switch lane to achive higher velocity and distance to the car aher (leader)       
 
-#### states of FSM
+#### cost 
 
-1.    
+Each trajectory associated with cost that computed by cost estimator class. For each round of prediction, trajectory with lowest cost is selected. Next factors and rules contribute to cost:
+
+1. It is better to keep line. If there is no other factors, change lane will receive small penalty.
+2. Faster is better, but respect speed limit. System adds penalty for speed different from target speed.
+3. Distance to leader car after maneuver. System tryes to predict state of the world in the future and adds penalty if there cars ahead.
+4. Collisions. System wil add penalty if it detects path overlap between ego and other vehicles. Even larger penalty added if overlap happened for lane changing
+5. Cut-off vehicle detection. System prefers slower speed if it will detect objects in already predicted area (unsafe zone).
+
+  
   
 
         
