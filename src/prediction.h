@@ -47,11 +47,6 @@ public:
 		auto distance = timing_.get_distance_at(delay);
 		return start_.s_ + distance;
 	}
-
-	const frenet predict_frenet_at(const double& delay) {
-		auto distance = timing_.get_distance_at(delay);
-		return path_->get_frenet_at(distance);
-	}
 };
 
 

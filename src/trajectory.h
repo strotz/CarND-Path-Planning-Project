@@ -36,7 +36,6 @@ private:
 public:
 
 	position get_position_at(const double& distance);
-	frenet get_frenet_at(const double& distance);
 
 	const vehicle_state& predicted() const {
 		return predicted_state_;

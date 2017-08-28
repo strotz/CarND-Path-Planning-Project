@@ -96,9 +96,3 @@ trajectory::shift_lane(world_cref road, const vehicle_state &car, int target_lan
 	return result;
 }
 
-frenet trajectory::get_frenet_at(const double &distance) {
-	auto xy = get_position_at(distance);
-	auto car_end_xy = get_position_at(distance - car_length);
-	double theta = atan2(xy.y_ - car_end_xy.y_, xy.x_ - car_end_xy.x_);
-	return road_.get_frenet_position(xy, theta);
-}

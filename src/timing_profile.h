@@ -7,12 +7,6 @@
 #include <algorithm>
 #include <iostream>
 
-const double max_duration = 0.5;
-const double step_duration = 0.02;
-const double required_steps = max_duration / step_duration;
-
-const double preffered_distance = max_duration * 2;
-
 class timing_profile {
 
 private:
