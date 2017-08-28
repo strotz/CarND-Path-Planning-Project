@@ -18,6 +18,11 @@ class cost_estimator {
 	sensor_fusion_cref others_;
 	const double& start_delay_;
 
+	const point& ego_s_;
+	const double ego_min_d_;
+	const double ego_max_d_;
+	const point& ego_start_s_;
+
 public:
 
 	cost_estimator(
@@ -31,8 +36,17 @@ public:
 		car_(car),
 		candidate_(candidate),
 		others_(others),
-		start_delay_(start_delay)
+		start_delay_(start_delay),
+		ego_s_(car_.s_),
+		ego_start_s_(candidate->start_state().s_),
+		ego_min_d_(car_.lane_min_d()),
+		ego_max_d_(car_.lane_max_d())
 	{
+		out() << "actual car s=" << ego_s_.value();
+		out() << " lane coverage d from " << ego_min_d_ << " to " << ego_max_d_;
+		out() << " v=" << car_.v_ << endl;
+
+		out() << "prediction start at S=" << ego_start_s_.value() << endl;
 	}
 
 	int calculate_cost();
@@ -43,7 +57,7 @@ private:
 
 	double distance_to_slow_leader();
 
-	double check_prediced();
+	double check_predicted();
 };
 
 

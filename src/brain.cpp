@@ -1,8 +1,6 @@
 
 #include "sensor_fusion.h"
 #include "brain.h"
-#include "prediction.h"
-#include "trajectory.h"
 #include "cost_estimator.h"
 
 void brain::reset_state(vehicle_state_cref car) {
@@ -44,11 +42,13 @@ unique_ptr<prediction> brain::run_planning(vehicle car, sensor_fusion_cref other
 	int best_cost = 999999999;
 	states best_acton;
 	unique_ptr<prediction> best_prediction;
+
 	for (auto action : possible_transitions) {
 
 		auto candidate = generate_prediction(action, car, last_state_, others);
 		auto estimator = cost_estimator(action, car, candidate, others, start_delay);
 		auto cost = estimator.calculate_cost();
+
 		if (cost < best_cost) {
 			best_prediction.reset(candidate.release());
 			best_acton = action;
@@ -88,15 +88,15 @@ unique_ptr<prediction> brain::run_planning(vehicle car, sensor_fusion_cref other
 unique_ptr<prediction>
 brain::generate_keep_in_line(const vehicle_state &start_state, sensor_fusion_cref others) {
 
-	auto future = start_state.s_ + start_state.velocity() * preffered_distance;
+	auto future = start_state.s_ + start_state.v_ * preffered_distance;
 	auto leader = others.find_nearest_in_range(start_state.lane(), start_state.s_, future);
 
 	timing_profile timing;
 	if (leader != nullptr) {
-		double lead_v = min(leader->velocity(), target_velocity_);
-		timing = timing_profile_builder::reach_velocity(start_state.velocity(), lead_v, interval_);
+		double lead_v = min(leader->v_, target_velocity_);
+		timing = timing_profile_builder::reach_velocity(start_state.v_, lead_v, interval_);
 	} else {
-		timing = timing_profile_builder::reach_velocity(start_state.velocity(), target_velocity_, interval_);
+		timing = timing_profile_builder::reach_velocity(start_state.v_, target_velocity_, interval_);
 	}
 
 #ifdef DEV
@@ -119,10 +119,10 @@ brain::generate_slow_down(const vehicle_state &car, vehicle_state_cref start_sta
 
 	timing_profile timing;
 	if (leader != nullptr) {
-		double lead_v = min(leader->velocity() - 2.0, start_state.velocity()); // TODO: predict slow down required to move leader to safe zone
-		timing = timing_profile_builder::reach_velocity(start_state.velocity(), lead_v, interval_);
+		double lead_v = min(leader->v_ - 2.0, start_state.v_); // TODO: predict slow down required to move leader to safe zone
+		timing = timing_profile_builder::reach_velocity(start_state.v_, lead_v, interval_);
 	} else {
-		timing = timing_profile_builder::reach_velocity(start_state.velocity(), start_state.velocity(), interval_);
+		timing = timing_profile_builder::reach_velocity(start_state.v_, start_state.v_, interval_);
 	}
 
 #ifdef DEV
@@ -142,15 +142,15 @@ brain::generate_slow_down(const vehicle_state &car, vehicle_state_cref start_sta
 unique_ptr<prediction>
 brain::generate_change_line(const vehicle_state &start_state, sensor_fusion_cref others, int target_lane) {
 
-	auto future = start_state.s_ + start_state.velocity() * preffered_distance;
+	auto future = start_state.s_ + start_state.v_ * preffered_distance;
 	auto leader = others.find_nearest_in_range(target_lane, start_state.s_, future);
 
 	timing_profile timing;
 	if (leader != nullptr) {
-		double lead_v = min(leader->velocity(), start_state.velocity());
-		timing = timing_profile_builder::reach_velocity(start_state.velocity(), lead_v, interval_);
+		double lead_v = min(leader->v_, start_state.v_);
+		timing = timing_profile_builder::reach_velocity(start_state.v_, lead_v, interval_);
 	} else {
-		timing = timing_profile_builder::reach_velocity(start_state.velocity(), target_velocity_, interval_);
+		timing = timing_profile_builder::reach_velocity(start_state.v_, target_velocity_, interval_);
 	}
 
 #ifdef DEV

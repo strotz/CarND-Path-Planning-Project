@@ -38,26 +38,21 @@ bool cost_estimator::check_collision() {
 	return false;
 }
 
-double cost_estimator::check_prediced() {
-	auto ego_s = car_.s_;
-	auto ego_finish_s_ = candidate_->start_state().s_;
+double cost_estimator::check_predicted() {
 
-	out() << "ego s=" << ego_s.value() << endl;
-	auto ego_min_d = (car_.lane()) * lane_width;
-	auto ego_max_d = (car_.lane() + 1) * lane_width;
+	auto ego_v = max(car_.v_, candidate_->start_state().v_);
 
-	auto ego_v = max(car_.velocity(), candidate_->start_state().velocity());
+	const double unsafe_distance = ego_start_s_ - ego_s_;
 
-	const double safe_distance = ego_finish_s_ - ego_s;
-	double current_distance = safe_distance + 1;
+	double closest_distance = unsafe_distance + 1;
 	double current_v;
 
 	for(const auto& c:others_.cars()) {
-		if ((ego_min_d < c.d_) && (c.d_ < ego_min_d) && (ego_s < c.s_) && (c.s_ < ego_finish_s_)) {
-			out() << "car id=" << c.id_ << " in predicted zone" << endl;
-			double distance = c.s_ - ego_s;
-			if (distance < current_distance) {
-				current_distance = distance;
+		if ((ego_min_d_ < c.d_) && (c.d_ < ego_max_d_) && (ego_s_ < c.s_) && (c.s_ < ego_start_s_)) {
+			out() << "car id=" << c.id_ << " in unsafe zone" << endl;
+			double distance = c.s_ - ego_s_;
+			if (distance < closest_distance) {
+				closest_distance = distance;
 				current_v = c.v_;
 			}
 		}
@@ -78,7 +73,7 @@ double cost_estimator::distance_to_slow_leader() {
 	auto ego_min_d = (candidate_->end_state().lane()) * lane_width;
 	auto ego_max_d = (candidate_->end_state().lane() + 1) * lane_width;
 
-	auto ego_v = candidate_->end_state().velocity();
+	auto ego_v = candidate_->end_state().v_;
 
 	double good_distance = total_delay * ego_v;
 	out() << "good distance: " << good_distance << endl;
@@ -87,7 +82,7 @@ double cost_estimator::distance_to_slow_leader() {
 	for (const auto &c : others_.cars()) {
 		out() << "car id=" << c.id_ << " v=" << c.v_ << " d=" << c.d_ << endl;
 		if ((ego_min_d <= c.d_) && (c.d_ <= ego_max_d)) {
-			auto s = c.s_ + c.velocity() * total_delay;
+			auto s = c.s_ + c.v_ * total_delay;
 			out() << "s=" << s.value() << " ";
 			auto distance = s - ego_s;
 			out() << "distance=" << distance;
@@ -120,7 +115,7 @@ int cost_estimator::calculate_cost() {
 		}
 	}
 
-	result += check_prediced() * 3000; // force to slow down and move cars from already predicted zone
+	result += check_predicted() * 3000; // force to slow down and move cars from already predicted zone
 
 	result += distance_to_slow_leader() * 12; // penalize
 

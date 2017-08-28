@@ -33,26 +33,20 @@ public:
 
 	position p_;
 	point s_;
-
 	double d_;
-
 	double orientation_;
 	double v_;
-
-	double orientation() const {
-		return orientation_;
-	}
-
-	position position_now() const {
-		return p_;
-	}
 
 	int lane() const {
 		return d_to_lane(d_);
 	}
 
-	double velocity() const {
-		return v_;
+	double lane_min_d() const {
+		return d_to_lane(d_) * lane_width;
+	}
+
+	double lane_max_d() const {
+		return (d_to_lane(d_) + 1) * lane_width;
 	}
 };
 
